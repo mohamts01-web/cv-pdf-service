@@ -16,8 +16,14 @@ app.post("/generate-pdf", async (req, res) => {
     });
 
     const page = await browser.newPage();
+
+    // 1️⃣ ضع محتوى HTML
     await page.setContent(html, { waitUntil: "networkidle0" });
 
+    // 2️⃣ انتظر تحميل كل الخطوط (مهم للعربية والإنجليزية)
+    await page.evaluateHandle('document.fonts.ready');
+
+    // 3️⃣ توليد PDF
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -26,6 +32,7 @@ app.post("/generate-pdf", async (req, res) => {
 
     await browser.close();
 
+    // 4️⃣ إرسال PDF للمستخدم
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": "attachment; filename=cv.pdf"
